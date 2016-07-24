@@ -1,0 +1,11 @@
+<% include ../layouts/header %>
+<div class="container form">
+  <form class="well" method="post" action="/login">
+    <input type="text" name="user" value="" class="form-control" placeholder="User name">
+    <input type="password" name="pass" value="" class="form-control" placeholder="Password">
+    <input type="submit" value="Login" class="btn btn-primary">
+    <a class="btn btn-success" href="/register">Singup</a><br><br>
+    <a href="#">Reestablecer contraseña</a>
+  </form>
+</div>
+<% include ../layouts/footer %>
