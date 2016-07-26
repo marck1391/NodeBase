@@ -1,6 +1,6 @@
 module.exports = {
   index: (req, res)=>{
-    res.view('Auth/login')
+    res.render('Auth/login')
   },
   login: (req, res)=>{
     var name = req.body.user
@@ -49,11 +49,16 @@ module.exports = {
           error = 'Can\'t register user, please try later'
         }
         res.json({success: !error, error: error})
+        /*
+        jsonp callback
+        res.format
+        res.redirect
+        */
       })
     })
   },
   register: (req, res)=>{
-    res.view('Auth/register')
+    res.render('Auth/register')
   },
   logout: (req, res)=>{
     req.session.destroy(function(err){

@@ -1,5 +1,5 @@
 module.exports = {
   index: (req, res)=>{
-    res.view('home')
+    res.render('home')
   }
 }

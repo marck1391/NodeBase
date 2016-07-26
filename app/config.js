@@ -10,9 +10,6 @@ module.exports = {
 		resave: false,
 		saveUninitialized: true,
     options: {
-      mongo: {
-        url: 'mongodb://localhost/dbname'
-      }
     }
 	},
   assets: '/',

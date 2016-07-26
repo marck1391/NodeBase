@@ -1,19 +1,21 @@
-//TODO:Error handler
+//TODO:passport
 var express = require('express')
 var bodyParser = require('body-parser')
 var cookieParser = require('cookie-parser')
+var helmet = require('helmet')
 var fs = require('fs')
+
+_root = process.env.PWD
 
 var session = require('./Session')
 var routes = require('../app/routes')
 
-require('./DB')
-require('./Functions')
-
-_root = process.env.PWD
-
+db = require('./DB')
 app = express()
 
+app.disable('x-powered-by');
+
+app.use(helmet())
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({extended:  true}))
 app.set('view engine', config.viewEngine)
@@ -26,10 +28,7 @@ app.use(cookieParser(config.session.secret))
 app.use(session())
 
 app.use(function(req, res, next){
-  req.data = {isUser: req.session.loggedin}
-  res.view = function(view){
-    res.render(view, req.data)
-  }
+  app.locals.isUser = req.session.loggedin
   next()
 })
 
@@ -66,17 +65,19 @@ for(route in routes){
   app[method||'get'].apply(app, routeParams)
 }
 
-
-module.exports = {
-  listen: (port, host)=>{
-    server = app.listen(config.port, config.host, ()=>{
-      console.log(
-        'Listening on %s:%d',
-        server.address().address,
-        server.address().port
-      )
-    })
+db.connect((err, con)=>{
+  if(err){
+    console.error('Server cannot start')
+    process.exit(1)
+  }
+  db.connection = con
+  server = app.listen(config.port, config.host, ()=>{
+    console.log(
+      'Server listening on http://%s:%d',
+      server.address().address,
+      server.address().port
+    )
     require('./WebSocketServer')
     require('../app/WSS')
-  }
-}
+  })
+})

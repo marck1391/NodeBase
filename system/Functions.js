@@ -1,17 +1,19 @@
 var path = require('path')
 
-baseurl = (asset)=>{
-  return path.join(config.url, asset)
-}
+module.exports = ()=>{
+	app.locals.baseurl = (asset)=>{
+	  return path.join(config.url, asset)
+	}
 
-assets = (asset)=>{
-  return path.join(config.assets, asset)
-}
+	app.locals.assets = (asset)=>{
+	  return path.join(config.assets, asset)
+	}
 
-style = (file)=>{
-  return assets(path.join('css', file+'.css'))
-}
+	app.locals.style = (file)=>{
+	  return assets(path.join('css', file+'.css'))
+	}
 
-script = (file)=>{
-  return assets(path.join('js', file+'.js'))
+	app.locals.script = (file)=>{
+	  return assets(path.join('js', file+'.js'))
+	}
 }
