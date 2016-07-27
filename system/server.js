@@ -8,11 +8,11 @@ var fs = require('fs')
 _root = process.env.PWD
 
 var session = require('./Session')
+var db = require('./DB')
+
 var routes = require('../app/routes')
 
-db = require('./DB')
 app = express()
-
 app.disable('x-powered-by');
 
 app.use(helmet())
@@ -27,7 +27,7 @@ for(var path in config.staticContent){
 app.use(cookieParser(config.session.secret))
 app.use(session())
 
-app.use(function(req, res, next){
+app.use((req, res, next)=>{
   app.locals.isUser = req.session.loggedin
   next()
 })
@@ -58,25 +58,33 @@ for(route in routes){
   ctrlname = ctrlname.replace(/[!?]/g, '')
   var [route, method] = route.split(' ').reverse()
   var routeParams = [route]
-  mws.forEach(function(mw, i){
+  mws.forEach((mw, i)=>{
     routeParams.push(require('../app/Middlewares/'+mw))
   })
   routeParams.push(require('../app/Controllers/'+ctrlname)[func])
   app[method||'get'].apply(app, routeParams)
 }
 
-db.connect((err, con)=>{
+app.use((req, res, next)=>{
+  res.status(404).send('Not found')
+})
+
+app.use((err, req, res, next)=>{
+  res.status(500).send('error')
+})
+
+db.connect((err)=>{
   if(err){
-    console.error('Server cannot start')
+    console.info('Server can\'t start')
     process.exit(1)
   }
-  db.connection = con
   server = app.listen(config.port, config.host, ()=>{
     console.log(
       'Server listening on http://%s:%d',
       server.address().address,
       server.address().port
     )
+    require('./Functions')
     require('./WebSocketServer')
     require('../app/WSS')
   })

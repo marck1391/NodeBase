@@ -4,8 +4,11 @@ ObjectId = mongoose.Schema.Types.ObjectId
 Model = mongoose.model.bind(mongoose)
 
 module.exports.connect = (cb)=>{
-	var connection = mongoose.connect(config.dburl, (err)=>{
-		console.error(err?'Database connection error':'Database connected')
-		cb(err, connection)
+	return mongoose.connect(config.dburl, (err)=>{
+		if(err)
+			console.error('Database connection error')
+		else
+			console.info('Database connected')
+		cb(err)
 	})	
 }

@@ -1,3 +1,5 @@
+var bcrypt = require('bcrypt')
+
 module.exports = {
   index: (req, res)=>{
     res.render('Auth/login')
@@ -6,14 +8,14 @@ module.exports = {
     var name = req.body.user
     var pass = req.body.pass
 
-    if(name==''||pass=='')
+    if(!name||!pass)
     return res.json({success: false, error: 'User name and password can\'t be empty'})
 
     User.findOne({name: name}, (err, user)=>{
       var error
       if(err){
         error = 'Unexpected error'
-      }else if(user==null||pass!=user.password){
+      }else if(user==null||!bcrypt.compareSync(pass, user.password)){
         error = 'Wrong user or password'
       }else{
         req.session.loggedin = true
@@ -23,7 +25,6 @@ module.exports = {
     })
   },
   signup: (req, res)=>{
-    console.log('asdasdasd')
     var name = req.body.user
     var pass = req.body.pass
     var cpass = req.body.cpass
@@ -41,7 +42,7 @@ module.exports = {
 
       var user = new User()
       user.name = name
-      user.password = pass
+      user.password = bcrypt.hashSync(pass, 10)
       user.email = email
       user.status = 0
       user.save((err)=>{
