@@ -1,27 +1,25 @@
 var bcrypt = require('bcrypt')
+var async = require('async')
 
 module.exports = {
   index: (req, res)=>{
     res.render('Auth/login')
   },
-  login: (req, res)=>{
+  login: (req, res, end)=>{
     var name = req.body.user
     var pass = req.body.pass
-
     if(!name||!pass)
-    return res.json({success: false, error: 'User name and password can\'t be empty'})
+      throw new Error('User name and password can\'t be empty')
 
     User.findOne({name: name}, (err, user)=>{
-      var error
-      if(err){
-        error = 'Unexpected error'
-      }else if(user==null||!bcrypt.compareSync(pass, user.password)){
-        error = 'Wrong user or password'
-      }else{
-        req.session.loggedin = true
-        req.session.user = user
-      }
-      res.json({success: !error, error: error})
+      if(err)
+        res.json(new Error('Unexpected error'))
+      else if(user==null||!bcrypt.compareSync(pass, user.password))
+        return end(new Error('Wrong user or password'))
+
+      req.session.loggedin = true
+      req.session.user = user
+      res.json({success: true})
     })
   },
   signup: (req, res)=>{
@@ -31,14 +29,13 @@ module.exports = {
     var email = req.body.email
 
     if(!name||!pass||!cpass||!email)
-      return res.json({success: false, error: 'Please fill the required fields'})
+      throw new Error('Please fill the required fields')
     if(pass!=cpass)
-      return res.json({success: false, error: 'Passwords doesn\'t match'})
+      throw new Error('Passwords doesn\'t match')
 
     User.findOne({name: name}, (err, user)=>{
-      var error = err?'Unexpected error':(user!=null?'User already exists':null)
-
-      if(error) return res.json({success: !error, error: error})
+      if(err)
+        return end(new Error(err?'Unexpected error':(user!=null?'User already exists':null)))
 
       var user = new User()
       user.name = name
@@ -46,10 +43,9 @@ module.exports = {
       user.email = email
       user.status = 0
       user.save((err)=>{
-        if(err){
-          error = 'Can\'t register user, please try later'
-        }
-        res.json({success: !error, error: error})
+        if(err)
+          return end(new Error('Can\'t register user, please try again later'))
+        res.json({success: true})
         /*
         jsonp callback
         res.format
