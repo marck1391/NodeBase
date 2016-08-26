@@ -15,6 +15,7 @@ var session = require('./Session')
 db.connect((err)=>{
   if(err){
     console.info('Server can\'t start')
+    console.error(err)
     process.exit(1)
   }
   app = express()

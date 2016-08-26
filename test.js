@@ -1,40 +1,34 @@
-config = require('./app/config')
-var db = require('./system/DB')
-var mongoose = require('mongoose')
-var assert = require('assert')
-var Schema = mongoose.Schema
-var Model = mongoose.model.bind(mongoose)
+var Router = require('express').Router
+var e = require('express')
+var app = e()
 
-var testSchema = new Schema({
-	name: {type: String, trim: true, lowercase: true},
-	email: {type: String, trim: true, lowercase: true}
-})
+Router.group = function(path, cb) {
+	var group = new Router()
+	this.use(path, group)
+	var astr = cb.toString().replace(/(\n(.*))|(function|[\s{()])/g, '')
+	var args = astr==''?[]:astr.split(',')
+	cb.apply(group, args.map(function(arg){
+		return group[arg].bind(group)
+	}))
+};
 
-testSchema.methods.hola = function(cb){
-	this.save(function(err){
-		cb(err)
+var r = new Router()
+r.group('/a', function (group, get) {
+	get('/b1', function (req, res) {
+		res.send('a/b1')
 	})
-}
-
-testSchema.pre('hola', function(next){
-	var test = this
-	Test.findOne({$or: [{email: test.email}, {name: test.name}]}, function(err, doc){
-		/*if(doc){
-			if(doc.name==test.name) message = 'Username already in use'
-			else if(doc.email==test.email) message = 'Email already registered'
-			return next(new Error(message))
-		}*/
-		next(err)
+	group('/b2', function(get){
+		get('/c1', function (req, res){
+			res.send('a/b2/c1')
+		})
 	})
 })
+r.get('/login', function(req, res){
+	res.send('test/login')
+})
 
-var Test = mongoose.model('Test2', testSchema)
+app.use(r)
 
-db.connect(function(err){
-	var t = new Test()
-	t.name = 'Marks2'
-	t.email = 'adminssss@mark.com'
-	t.hola(function(err){
-		console.log('yeah', err)
-	})
+app.listen(3000, function(){
+	console.log('listen')
 })
