@@ -35,5 +35,8 @@
     "url": "https://github.com/marck1391/NodeBase"
   },
   "author": "Marco Orta <marck1391@gmail.com> (http://m4rk.xyz)",
-  "license": "MIT"
+  "license": "MIT",
+  "devDependencies": {
+    "colors": "^1.1.2"
+  }
 }
