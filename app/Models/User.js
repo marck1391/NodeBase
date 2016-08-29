@@ -7,13 +7,4 @@ var schema = Schema({
   timestamps: true
 })
 
-schema.methods.logout = (cb)=>{
-  cb = cb || function(){}
-  this.status = 0
-  this.save((err)=>{
-    if(err) return cb(err)
-    cb(err)
-  })
-}
-
 User = Model('User', schema)

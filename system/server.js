@@ -75,6 +75,7 @@ db.connect((err)=>{
   })
 
   app.use((err, req, res, next)=>{
+    //console.error(err)
     res.status(500).send('error')
   })
   
@@ -89,7 +90,6 @@ db.connect((err)=>{
     require('../app/WSS')
   })
 })
-
 //process.on('uncaughtException', function(err){
   //res.status(500).json({success: false, error: err.message})
 //})
