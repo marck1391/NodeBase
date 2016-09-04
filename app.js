@@ -1,6 +1,6 @@
 require('dotenv').config()
-config = require('./app/config')
 
+config = require('./system/Config')
 require('./system/Debug')
 require('./system/server')
 

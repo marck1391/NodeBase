@@ -56,7 +56,7 @@ db.connect((err)=>{
   })
 
   for(route in routes){
-    var [ctrlname, func] = ((routes[route].controller||routes[route])||'').split('.')
+    var [ctrlname, func] = ((routes[route].controller||routes[route])||'').split('@')
     var mws = routes[route].middlewares||[]
     if(ctrlname.charAt(0)=='!'){
       mws.push('Auth')

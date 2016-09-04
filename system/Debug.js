@@ -1,4 +1,5 @@
 var util = require('util')
+var colors = require('colors')
 require('../system/Functions')
 //Config
 debug = true
