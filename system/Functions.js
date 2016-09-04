@@ -1,5 +1,6 @@
 var path = require('path')
 var colors = require('colors')
+var http = require('http')
 
 baseurl = (asset)=>{
   return path.join(config.url, asset)
@@ -17,21 +18,9 @@ script = (file)=>{
   return assets(path.join('js', file+'.js'))
 }
 
-logDate = function(){
-	return '['+(new Date()).toISOString().replace(/(.*)?T(\d+:\d+:\d+).*/, "$1 $2")+']';
-}
-
-/*function Singleton(enable){
-	if (arguments.callee._singletonInstance) {
-		return arguments.callee._singletonInstance
-	}
-	arguments.callee._singletonInstance = this
-	this.showdate = true
-}*/
-
 //Decorators
 override = function(object, methodname, callback){
-	object[methodname] = callback(object[methodname])
+	object[methodname] = callback(object[methodname]).bind(object)
 }
 
 before = function(extraBehavior){
@@ -51,4 +40,8 @@ compose = function(modifier){
 			return original.call(this, res)
 		}
 	}
+}
+
+http.ServerResponse.prototype.view = function(view, data){
+  this.render(view, Object.assign(this.req.data, data||{}))
 }

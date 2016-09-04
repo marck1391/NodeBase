@@ -1,13 +1,12 @@
-//TODO:passport
 var express = require('express')
 var bodyParser = require('body-parser')
 var cookieParser = require('cookie-parser')
 var helmet = require('helmet')
 var fs = require('fs')
-var http = require('http')
 
 _root = process.env.PWD
 
+require('./Functions')
 var routes = require('../app/routes')
 var db = require('./DB')
 var session = require('./Session')
@@ -32,8 +31,13 @@ db.connect((err)=>{
   }
   app.use(cookieParser(config.session.secret))
   app.use(session())
+
+  require('./Passport')
+
   app.use((req, res, next)=>{
-    app.locals.isUser = req.session.loggedin
+    app.locals.isUser = req.user||req.session.user
+    req.data = {}
+    req.data.user = req.user||req.session.user
     next()
   })
 
@@ -52,9 +56,7 @@ db.connect((err)=>{
   })
 
   for(route in routes){
-    var [ctrlname, func] = (typeof routes[route]=='object'?
-      routes[route].controller:
-      routes[route]).split('.')
+    var [ctrlname, func] = ((routes[route].controller||routes[route])||'').split('.')
     var mws = routes[route].middlewares||[]
     if(ctrlname.charAt(0)=='!'){
       mws.push('Auth')
@@ -64,9 +66,13 @@ db.connect((err)=>{
     var [route, method] = route.split(' ').reverse()
     var routeParams = [route]
     mws.forEach((mw, i)=>{
-      routeParams.push(require('../app/Middlewares/'+mw))
+      if(typeof mw!=='string')
+        routeParams.push(mw)
+      else
+        routeParams.push(require('../app/Middlewares/'+mw))
     })
-    routeParams.push(require('../app/Controllers/'+ctrlname)[func])
+    if(ctrlname)
+      routeParams.push(require('../app/Controllers/'+ctrlname)[func])
     app[method||'get'].apply(app, routeParams)
   }
 
@@ -75,7 +81,7 @@ db.connect((err)=>{
   })
 
   app.use((err, req, res, next)=>{
-    //console.error(err)
+    process.stdout.write(`[${req.url}]`.cyan.bold+`[ERROR: ${err.message}\n`.red.bold)
     res.status(500).send('error')
   })
   
@@ -85,7 +91,6 @@ db.connect((err)=>{
       server.address().address,
       server.address().port
     )
-    require('./Functions')
     require('./WebSocketServer')
     require('../app/WSS')
   })

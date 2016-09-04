@@ -1,13 +1,11 @@
-var debug = require('../system/Functions')
 var util = require('util')
+require('../system/Functions')
 //Config
 debug = true
 showDate = false
 showLine = true
 showFile = true
 showColors = true
-
-if(!debug) return;
 
 class Trace extends Error{
 	get file(){
@@ -20,19 +18,21 @@ class Trace extends Error{
 		return this.parseStack[2]
 	}
 	get parseStack() {
-		if(!this.stack) return '?';
-		var line = this.stack.split('\n')[4];
+		if(!this.stack) return '?'
+		//TODO: Incorrect error line
+		var line = this.stack.split('\n')[4]
 		var file = line.split(' (')[1]
 		line = (line.indexOf(' (') >= 0
 			? file.substring(0, file.length - 1)
 			: line.split('at ')[1]
 			);
-		return line.split(':');
+		return line.split(':')
 	}
 }
 
 function colorLog(color){
 	return function(){
+		if(!debug) return;
 		if(!showColors) return util.format.apply(util, arguments)
 		var args = [...arguments].map(arg=>{
 			if(typeof arg === 'object' && !Array.isArray(arg))
@@ -52,6 +52,10 @@ function colorLog(color){
 		str = (info!=''?info+' ':'')+str[color]
 		return str
 	}
+}
+
+function logDate(){
+	return '['+(new Date()).toISOString().replace(/(.*)?T(\d+:\d+:\d+).*/, "$1 $2")+']';
 }
 
 override(console, 'log', compose(colorLog('green')))
