@@ -1,5 +1,6 @@
 var bcrypt = require('bcrypt')
 var async = require('async')
+var passport = require('passport')
 
 module.exports = {
   index: (req, res)=>{
@@ -12,7 +13,6 @@ module.exports = {
     if(!name||!pass)
       return end(new Error('User name and password can\'t be empty'))
     User.findOne({name: name}, (err, user)=>{
-      return end(new Error('jajaja'))
       if(err)
         return end(new Error('Unexpected error'))
       else if(user==null||!bcrypt.compareSync(pass, user.password))
@@ -54,8 +54,11 @@ module.exports = {
     res.render('Auth/register')
   },
   logout: (req, res)=>{
+    req.user = null
     req.session.destroy(function(err){
       res.redirect('/login')
     })
-  }
+  },
+  google: passport.authenticate('google', { scope: ['profile'] }),
+  googleCallback: passport.authenticate('google', { successRedirect: '/', failureRedirect: '/login' })
 }
