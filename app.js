@@ -1,3 +1,4 @@
+require('dotenv').config()
 config = require('./app/config')
 
 require('./system/Debug')
